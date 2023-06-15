@@ -1,0 +1,5 @@
+- name: restart servers
+  ansible.builtin.command: /bin/true
+  notify: 
+    - 'nginx : restart'
+    - 'dnsmasq : restart'

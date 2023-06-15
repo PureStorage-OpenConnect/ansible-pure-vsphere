@@ -1,0 +1,35 @@
+- name: Disconnect datastore from DR cluster
+  purestorage.flasharray.purefa_hg:
+    name: "{{ dr_cluster }}"
+    volume:
+      - "{{ item.name }}"
+    state: absent
+    fa_url: "{{ repl_fa_url }}"
+    api_token: "{{ repl_fa_api_token }}"
+  loop: "{{ datastores }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Rescan HBA's for DR cluster
+  community.vmware.vmware_host_scanhba:
+    hostname: "{{ dr_vcenter_hostname }}"
+    username: "{{ dr_vcenter_username }}"
+    password: "{{ dr_vcenter_password }}"
+    cluster_name: "{{ dr_cluster }}"
+    refresh_storage: true
+    rescan_vmfs: true
+    validate_certs: false
+
+- name: Create R/W clones of replicated datastores
+  purestorage.flasharray.purefa_pgsnap:
+    name: "{{ main_fa }}:{{ repl_pg_name }}"
+    suffix: "{{ snapshot_suffix }}"
+    restore:  "{{ datastore_name }}"
+    target: "{{ item.name }}"
+    overwrite: true
+    state: copy
+    fa_url: "{{ repl_fa_url }}"
+    api_token: "{{ repl_fa_api_token }}"
+  loop: "{{ datastores }}"
+  loop_control:
+    label: "{{ item.name }}"

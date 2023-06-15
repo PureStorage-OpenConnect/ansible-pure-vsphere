@@ -1,0 +1,18 @@
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars:
+    snapshot_suffix: 6
+    datastore_new_name: eg_new_datastore01
+  tasks:
+
+  - name: Create R/W clones of replicated datastores
+    purestorage.flasharray.purefa_pgsnap:
+      name: "{{ main_fa }}:{{ repl_pg_name }}"
+      suffix: "{{ snapshot_suffix }}"
+      restore:  "{{ datastore_name }}"
+      target: "{{ datastore_new_name }}"
+      overwrite: true
+      state: copy
+      fa_url: "{{ repl_fa_url }}"
+      api_token: "{{ repl_fa_api_token }}"

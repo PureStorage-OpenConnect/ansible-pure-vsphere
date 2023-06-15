@@ -1,0 +1,67 @@
+- name: Create datastore volume "{{ vmfs_datastore_name }}" on FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_volume:
+    name: "{{ vmfs_datastore_name }}"
+    size: "{{ vmfs_datastore_size }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+    state: present
+    with_default_protection: "{{ fa_default_protection }}"
+
+- name: Get datastore volume serial
+  purestorage.flasharray.purefa_volume:
+    name: "{{ vmfs_datastore_name }}"
+    size: "{{ vmfs_datastore_size }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+    state: present
+  register: result
+
+- name: Connect datastore volume "{{ vmfs_datastore_name }}" to hostgroup "{{ cluster_name }}" on FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_hg:
+    hostgroup: "{{ cluster_name }}"
+    volume: "{{ vmfs_datastore_name }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+    state: present
+
+- name: Gather info from datacenter "{{ datacenter_name }}" about  cluster "{{ cluster_name }}"
+  community.vmware.vmware_cluster_info:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ datacenter_name }}"
+    cluster_name: "{{ cluster_name }}"
+    validate_certs: False
+  register: cluster_info
+
+- name: Rescan HBA's for cluster "{{ cluster_name }}"
+  community.vmware.vmware_host_scanhba:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    cluster_name: "{{ cluster_name }}"
+    refresh_storage: true
+    validate_certs: False
+
+- name: Mount VMFS datastore "{{ vmfs_datastore_name }}" to cluster "{{ cluster_name }}"
+  community.vmware.vmware_host_datastore:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datastore_name: "{{ vmfs_datastore_name }}"
+    datastore_type: vmfs
+    vmfs_device_name: "naa.624a9370{{ result.volume.serial | lower }}"
+    vmfs_version: 6
+    esxi_hostname: "{{ cluster_info.clusters[cluster_name].hosts[0].name }}"
+    state: present
+    validate_certs: False
+
+- name: Rescan HBA's for cluster "{{ cluster_name }}"
+  community.vmware.vmware_host_scanhba:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    cluster_name: "{{ cluster_name }}"
+    refresh_storage: true
+    rescan_vmfs: true
+    validate_certs: False

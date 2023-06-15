@@ -1,0 +1,37 @@
+- name: Modify boot.cfg (step 1)
+  ansible.builtin.replace:
+    path: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    regexp: '^prefix=.*$'
+    replace: 'prefix=http://{{ http_host }}/{{ os_version }}'
+
+- name: Modify boot.cfg (step 2)
+  ansible.builtin.replace:
+    path: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    regexp: '^kernel=/'
+    replace: 'kernel='
+
+- name: Modify boot.cfg (step 3)
+  ansible.builtin.replace:
+    path: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    regexp: '^modules=/'
+    replace: 'modules='
+
+- name: Modify boot.cfg (step 4)
+  ansible.builtin.replace:
+    path: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    regexp: '--- /'
+    replace: '--- '
+
+- name: Modify boot.cfg (step 5)
+  ansible.builtin.replace:
+    path: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    regexp: '(kernelopt=.+)\scdromBoot(.*)$'
+    replace: '\1 \2'
+  when: install_type  == "tftp"
+
+- name: Modify boot.cfg (step 5)
+  ansible.builtin.replace:
+    path: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    regexp: '^kernelopt=.*$'
+    replace: 'kernelopt=ks=http://{{ http_host }}/ks_files/{{ esxi_ks_filename | basename }}'
+  when: install_type == "http"

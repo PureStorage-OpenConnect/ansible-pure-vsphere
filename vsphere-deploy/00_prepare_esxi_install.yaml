@@ -1,0 +1,12 @@
+- hosts: esxi_installer
+  gather_facts: false
+  vars:
+    ipxe_compile_dir: /var/tmp/ipxe-build
+    tftpboot_dir: /var/tmp/esxi-tftpboot
+    http_install_dir: /var/tmp/esxi-http-install
+    dnsmasq_conf_file: /home/ubuntu/containers/dnsmasq/dnsmasq.conf
+  roles:
+    - prepare_esxi
+    - dnsmasq
+    - nginx
+    - restart

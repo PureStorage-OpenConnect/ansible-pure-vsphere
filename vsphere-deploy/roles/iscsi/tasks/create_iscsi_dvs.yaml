@@ -1,0 +1,40 @@
+- name: Create dvSwitch
+  community.vmware.vmware_dvswitch:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ datacenter_name }}"
+    switch: "{{ iscsi_dvswitch.name }}"
+    uplink_quantity: 2
+    state: present
+    validate_certs: no
+
+- name: Add iSCSI portgroup iscsi-1
+  community.vmware.vmware_dvs_portgroup:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    switch_name: "{{ iscsi_dvswitch.name }}"
+    portgroup_name: "{{ iscsi_dvswitch.pgroups.iscsi1.name }}"
+    port_binding: "{{ iscsi_dvswitch.pgroups.iscsi1.port_binding }}"
+    vlan_id: "{{ iscsi_dvswitch.pgroups.iscsi1.vlan }}"
+    state: present
+    teaming_policy:
+      active_uplinks:
+        - "Uplink 1"
+    validate_certs: no
+
+- name: Add iSCSI portgroup iscsi-2
+  community.vmware.vmware_dvs_portgroup:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    switch_name: "{{ iscsi_dvswitch.name }}"
+    portgroup_name: "{{ iscsi_dvswitch.pgroups.iscsi2.name }}"
+    port_binding: "{{ iscsi_dvswitch.pgroups.iscsi2.port_binding }}"
+    vlan_id: "{{ iscsi_dvswitch.pgroups.iscsi2.vlan }}"
+    state: present
+    teaming_policy:
+      active_uplinks:
+        - "Uplink 2"
+    validate_certs: no

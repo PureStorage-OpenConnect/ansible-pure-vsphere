@@ -1,0 +1,23 @@
+- name: Create tftp boot directory
+  ansible.builtin.file:
+    path: "{{ tftpboot_dir }}/{{ os_version }}"
+    state: directory
+    mode: '0755'
+
+- name: Create http installer directory
+  ansible.builtin.file:
+    path: "{{ http_install_dir }}/{{ os_version }}"
+    state: directory
+    mode: '0755'
+
+- name: Create http  kickstart files directory
+  ansible.builtin.file:
+    path: "{{ http_install_dir }}/ks_files"
+    state: directory
+    mode: '0755'
+
+- name: Create tftpboot pxelinux.cfg
+  ansible.builtin.file:
+    path: "{{ tftpboot_dir }}/{{ os_version }}/pxelinux.cfg"
+    state: directory
+    mode: '0755'

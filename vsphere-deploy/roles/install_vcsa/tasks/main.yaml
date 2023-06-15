@@ -1,0 +1,87 @@
+- name: Ensure mounting dir is available
+  ansible.posix.mount:
+    path: '{{ vcsa_mount_dir }}'
+    state: unmounted
+  become: true
+
+- name: Create VCSA DVD mount dir
+  ansible.builtin.file:
+    path: '{{ vcsa_mount_dir }}'
+    state: directory
+    mode: '0755'
+
+- name: Mount VCSA DVD
+  ansible.posix.mount:
+    path: "{{ vcsa_mount_dir }}"
+    src: "{{ vcsa_iso }}"
+    fstype: iso9660
+    opts: ro,loop
+    state: ephemeral
+  become: true
+
+- name: Create temporary JSON deployment file
+  ansible.builtin.tempfile:
+    state: file
+    suffix: json
+  register: tempfile
+
+- name: Fill in JSON deployment file
+  ansible.builtin.template:
+    src: vcsa.j2
+    dest: "{{ tempfile.path }}"
+
+- name: Exec dryrun install
+  ansible.builtin.command:
+    argv:
+      - "{{ vcsa_mount_dir }}/vcsa-cli-installer/lin64/vcsa-deploy"
+      - install
+      - --precheck-only
+      - --accept-eula
+      - --no-ssl-certificate-verification
+      - "{{ tempfile.path }}"
+  when: dryrun is defined and dryrun
+
+- name: Exec dryrun install
+  ansible.builtin.command:
+    argv:
+      - "{{ vcsa_mount_dir }}/vcsa-cli-installer/lin64/vcsa-deploy"
+      - install
+      - --precheck-only
+      - --accept-eula
+      - --no-ssl-certificate-verification
+      - "{{ tempfile.path }}"
+  when: dryrun is not defined or not dryrun
+
+- name: Exec vcsa install
+  ansible.builtin.command:
+    argv:
+      - "{{ vcsa_mount_dir }}/vcsa-cli-installer/lin64/vcsa-deploy"
+      - install
+      - --accept-eula
+      - --no-ssl-certificate-verification
+      - "{{ tempfile.path }}"
+  when: dryrun is not defined or not dryrun
+
+- name: Wait until VCSA is installed
+  community.vmware.vmware_about_info:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+  register: vcenter_about_info
+  until: vcenter_about_info is not failed and vcenter_about_info.about_info is defined and vcenter_about_info.about_info.product_name == "VMware vCenter Server"
+  delay: 60
+  retries: 40
+  when: dryrun is not defined or not dryrun
+
+- name: Unmount DVD
+  ansible.posix.mount:
+    path: "{{ vcsa_mount_dir }}"
+    state: unmounted
+  become: true
+
+- name: Remove temporary installer file
+  ansible.builtin.file:
+    path: "{{ tempfile.path }}"
+    state: absent
+  when: tempfile.path is defined

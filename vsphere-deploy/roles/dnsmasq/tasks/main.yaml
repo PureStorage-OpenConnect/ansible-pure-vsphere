@@ -1,0 +1,13 @@
+- name: Run dnsmasq DHCP bootserver
+  community.docker.docker_container:
+    name: dnsmasq
+    state: started
+    image: ferrarimarco/pxe
+    capabilities:
+      - NET_ADMIN
+    network_mode: host
+    ports:
+      - "{{ dnsmasq_ip }}:67:67/udp"
+    volumes:
+      - "{{ tftpboot_dir }}/{{ os_version }}:/tftpboot"
+      - "{{ dnsmasq_conf_file }}:/etc/dnsmasq.conf"

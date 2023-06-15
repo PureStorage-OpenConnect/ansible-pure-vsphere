@@ -1,0 +1,26 @@
+- name: Add cluster "{{ cluster_name }}" ESXi hosts to FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_host:
+    name: "{{ item.name.split('.')[0] | lower }}"
+    personality: esxi
+    wwns: "{{ item.wwns }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create hostgroup "{{ cluster_name }}" on FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_hg:
+    hostgroup: "{{ cluster_name }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+
+- name: Add ESXi hosts to hostgroup "{{ cluster_name }}" on FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_hg:
+    hostgroup: "{{ cluster_name }}"
+    host: "{{ item.name.split('.')[0] | lower }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,21 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: collect snapshot set of information
+      purestorage.flasharray.purefa_info:
+        gather_subset:
+          - volumes
+        fa_url: "{{ repl_fa_url }}"
+        api_token: "{{ repl_fa_api_token }}"
+      register: array_info
+
+    - name: Retrieve datastore naaid
+      ansible.builtin.set_fact:
+        naaid: "{{ item.value.page83_naa }}"
+      loop: "{{ array_info.purefa_info.volumes | dict2items }}"
+      when: "datastore_name == item.key"
+
+    - name: show default information
+      ansible.builtin.debug:
+        msg: "{{ naaid }}"

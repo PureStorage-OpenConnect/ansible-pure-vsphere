@@ -1,0 +1,12 @@
+iscsi_dvswitch:
+  name: dvSwitch-iscsi
+  uplinks: 2
+  pgroups:
+    iscsi1:
+      name: iscsi-1
+      vlan: 0
+      port_binding: static
+    iscsi2:
+      name: iscsi-2
+      vlan: 0
+      port_binding: static

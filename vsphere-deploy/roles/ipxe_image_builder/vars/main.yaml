@@ -1,0 +1,4 @@
+ipxe_images:
+  - bin/undionly.kpxe
+  - bin-x86_64-efi/ipxe.efi
+ipxe_compile_dir: /var/tmp/ipxe-build

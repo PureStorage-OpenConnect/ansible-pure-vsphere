@@ -1,0 +1,49 @@
+- name: Add Host to iSCSI dvswitch
+  community.vmware.vmware_dvs_host:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    switch_name: "{{ iscsi_dvswitch.name }}"
+    vmnics:
+      - vmnic3
+      - vmnic4
+    state: present
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Add 1st iSCSI vmkernel port to dvswitch
+  community.vmware.vmware_vmkernel:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    dvswitch_name: "{{ iscsi_dvswitch.name }}"
+    portgroup_name: "{{ iscsi_dvswitch.pgroups.iscsi1.name }}"
+    network:
+      type: "dhcp"
+    device: vmk2
+    state: present
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Add 2nd vmkernel port to dvswitch
+  community.vmware.vmware_vmkernel:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    dvswitch_name: "{{ iscsi_dvswitch.name }}"
+    portgroup_name: "{{ iscsi_dvswitch.pgroups.iscsi2.name }}"
+    network:
+      type: "dhcp"
+    device: vmk3
+    state: present
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"

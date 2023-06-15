@@ -1,0 +1,26 @@
+- name: Build ubuntu docker image to compile iPXE
+  community.docker.docker_image:
+    build:
+      path: files/ipxe-image-builder
+    name: pure/ipxe-builder
+    tag: latest
+    push: false
+    source: build
+
+- name: Create iPXE build dir
+  ansible.builtin.file:
+    path: "{{ ipxe_compile_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Build iPXE
+  community.docker.docker_container:
+    name: ipxe-build
+    image: pure/ipxe-builder
+    detach: false
+    volumes:
+      - "{{ ipxe_compile_dir }}:/compile"
+    env:
+      ENV_BUILD: "make -j4 {{ item }}"
+    cleanup: true
+  loop: "{{ ipxe_images }}"

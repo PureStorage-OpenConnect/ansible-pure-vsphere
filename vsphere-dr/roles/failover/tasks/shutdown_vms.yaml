@@ -1,0 +1,18 @@
+- name: Shutdown VMs on main cluster
+  community.vmware.vmware_guest:
+    hostname: "{{ main_vcenter_hostname }}"
+    username: "{{ main_vcenter_username }}"
+    password: "{{ main_vcenter_password }}"
+    name: "{{ vm_name }}"
+    state: shutdownguest
+    validate_certs: no
+  ignore_errors: true
+
+- name: Ensure VMs are powered off on DR cluster
+  community.vmware.vmware_guest:
+    hostname: "{{ dr_vcenter_hostname }}"
+    username: "{{ dr_vcenter_username }}"
+    password: "{{ dr_vcenter_password }}"
+    name: "{{ vm_name }}"
+    state: poweredoff
+    validate_certs: no

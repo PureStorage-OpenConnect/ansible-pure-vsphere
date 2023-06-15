@@ -1,0 +1,32 @@
+- name: Ensure DVD is not mounted
+  ansible.posix.mount:
+    path: '{{ os_mount_dir }}'
+    state: unmounted
+  become: true
+
+- name: Create OS DVD mount directory
+  ansible.builtin.file:
+    path: "{{ os_mount_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Mount OS DVD ISO image
+  ansible.posix.mount:
+    path: '{{ os_mount_dir }}'
+    src: '{{ os_iso }}'
+    fstype: iso9660
+    opts: ro,loop
+    state: ephemeral
+  become: true
+
+- name: Copy OS install files to http install directory
+  ansible.posix.synchronize:
+    src: "{{ os_mount_dir }}/"
+    dest: "{{ http_install_dir }}/{{ os_version }}/"
+    perms: false
+
+- name: Unmount DVD
+  ansible.posix.mount:
+    path: '{{ os_mount_dir }}'
+    state: unmounted
+  become: true

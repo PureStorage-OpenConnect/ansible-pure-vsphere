@@ -1,0 +1,12 @@
+- hosts: all
+  gather_facts: false
+  strategy: free
+
+  tasks:
+    - ansible.builtin.include_role:
+        name: install_vcsa
+      when: '"vcsa_installer" in group_names'
+
+    - ansible.builtin.include_role:
+        name: install_esxi
+      when: '"esxi_installer" in group_names'

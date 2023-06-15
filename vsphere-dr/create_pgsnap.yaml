@@ -1,0 +1,14 @@
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  tasks:
+  
+  - name: Create protection group snapshot
+    purestorage.flasharray.purefa_pgsnap:
+      name: eg-test-repl-pg
+      suffix: ansible
+      state: present
+      now: yes
+      remote: yes
+      fa_url: 10.225.112.90
+      api_token: b5cb29e7-a93c-b40a-b02f-da2b90c8c65e

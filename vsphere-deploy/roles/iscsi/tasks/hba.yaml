@@ -1,0 +1,28 @@
+- name: Enable iSCSI HBA
+  community.vmware.vmware_host_iscsi:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    state: enabled
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Bind VMKernel interfaces to iSCSI HBA
+  community.vmware.vmware_host_iscsi:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    iscsi_config:
+      vmhba_name: vmhba65
+      port_bind:
+        - vmk2
+        - vmk3
+    state: present
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"

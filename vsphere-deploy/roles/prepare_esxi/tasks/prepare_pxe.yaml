@@ -1,0 +1,24 @@
+- name: Create temporary syslinux dir
+  ansible.builtin.file:
+    path: "{{ syslinux_tmp_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Extract syslinux from source tarball
+  ansible.builtin.unarchive:
+    src: "{{ syslinux_tarball }}"
+    dest: "{{ syslinux_tmp_dir }}"
+
+- name: Find pxelinux.0 in the install directory
+  ansible.builtin.find:
+    paths: "{{ syslinux_tmp_dir }}"
+    file_type: file
+    patterns: 'pxelinux.0'
+    use_regex: yes
+    recurse: true
+  register: output
+
+- name: Copy pxelinux.0 to tftpboot directory
+  ansible.builtin.copy:
+    src: "{{ output.files[0].path }}"
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/pxelinux.0"

@@ -1,0 +1,11 @@
+- name: Add management portgroup to main dvswitch
+  community.vmware.vmware_dvs_portgroup:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    switch_name: "{{ main_dvswitch.name }}"
+    portgroup_name: "{{ main_dvswitch.pgroups.management.name }}"
+    port_binding: "{{ main_dvswitch.pgroups.management.port_binding }}"
+    vlan_id: "{{ main_dvswitch.pgroups.management.vlan }}"
+    state: present
+    validate_certs: no

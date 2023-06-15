@@ -1,0 +1,46 @@
+- name: Collect volumes information
+  purestorage.flasharray.purefa_info:
+    gather_subset:
+      - volumes
+    fa_url: "{{ repl_fa_url }}"
+    api_token: "{{ repl_fa_api_token }}"
+  register: array_info
+
+- name: Retrieve datastore naaid
+  ansible.builtin.set_fact:
+    naaid: "{{ item.value.page83_naa | lower }}"
+  loop: "{{ array_info.purefa_info.volumes | dict2items }}"
+  when: "datastore_name == item.key" 
+
+- name: Connect datastores to DR cluster
+  purestorage.flasharray.purefa_hg:
+    name: "{{ dr_cluster }}"
+    volume:
+      - "{{ datastore_name }}"
+    state: present
+    fa_url: "{{ repl_fa_url }}"
+    api_token: "{{ repl_fa_api_token }}"
+
+- name: Rescan HBA's for DR cluster
+  community.vmware.vmware_host_scanhba:
+    hostname: "{{ dr_vcenter_hostname }}"
+    username: "{{ dr_vcenter_username }}"
+    password: "{{ dr_vcenter_password }}"
+    cluster_name: "{{ dr_cluster }}"
+    refresh_storage: true
+    rescan_vmfs: true
+    validate_certs: false
+
+- name: Resignature and mount VMFS datastore
+  community.vmware.vmware_host_datastore:
+    hostname: "{{ dr_vcenter_hostname }}"
+    username: "{{ dr_vcenter_username }}"
+    password: "{{ dr_vcenter_password }}"
+    datastore_name: "{{ datastore_new_name }}"
+    datastore_type: vmfs
+    vmfs_device_name: "{{ naaid }}"
+    vmfs_version: "{{ vmfs_version }}"
+    esxi_hostname: "{{ dr_cluster_info.clusters[dr_cluster].hosts[0].name }}" 
+    resignature: true
+    state: present
+    validate_certs: false

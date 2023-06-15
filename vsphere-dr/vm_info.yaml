@@ -1,0 +1,24 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+
+  - name: Gather vm info from virtual machine
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      datacenter: "{{ datacenter }}"
+      name: "{{ vm_name }}"
+      schema: vsphere
+      validate_certs: false
+    register: vm_info
+
+  - debug:
+      msg: "{{ vm_info }}"
+
+#  - name: save vm disk info to file
+#    ansible.builtin.copy:
+#      content: "{{ disk_info.guest_disk_info | to_nice_json }}"
+#      dest: "vms/{{ vm_name }}-disks-raw.json"
+#    delegate_to: localhost

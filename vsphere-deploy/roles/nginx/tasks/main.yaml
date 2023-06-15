@@ -1,0 +1,10 @@
+- name: Run nginx HTPP install server
+  community.docker.docker_container:
+    name: nginx
+    image: nginx
+    state: present
+    volumes:
+      - "{{ http_install_dir }}:/usr/share/nginx/html"
+    ports:
+      - "80:80"
+    cleanup: true

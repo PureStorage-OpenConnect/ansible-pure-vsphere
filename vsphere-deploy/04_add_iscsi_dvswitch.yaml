@@ -1,0 +1,7 @@
+- hosts: vcsa_installer
+  gather_facts: false
+
+  tasks:
+    - ansible.builtin.include_role:
+        name: iscsi
+      when: '"vcsa_installer" in group_names'

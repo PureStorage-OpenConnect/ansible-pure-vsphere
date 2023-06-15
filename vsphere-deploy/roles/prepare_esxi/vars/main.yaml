@@ -1,0 +1,7 @@
+install_type: http
+esxi_ks_template: esxi.ks.j2
+esxi_ks_filename: esxi.ks
+os_mount_dir: /var/tmp/esxi_installer
+tftpboot_dir: /var/tmp/esxi-tftpboot
+http_install_dir: /var/tmp/esxi-http-install
+syslinux_tmp_dir: /var/tmp/syslinux

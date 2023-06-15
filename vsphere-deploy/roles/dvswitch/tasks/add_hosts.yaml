@@ -1,0 +1,55 @@
+- name: Add Host to main DVS
+  community.vmware.vmware_dvs_host:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    switch_name: "{{ main_dvswitch.name }}"
+    vmnics:
+      - vmnic1
+      - vmnic2
+    state: present
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Add 2nd management vmkernel interface to management DPG
+  community.vmware.vmware_vmkernel:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    dvswitch_name: "{{ main_dvswitch.name }}"
+    portgroup_name: "{{ main_dvswitch.pgroups.management.name }}"
+    network:
+      type: "static"
+      ip_address: "{{ item.ip2 }}"
+      subnet_mask: "{{ item.netmask2 }}"
+    device: vmk1
+    state: present
+    enable_mgmt: true
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Migrate 1st management vmkernel interface to management DPG
+  community.vmware.vmware_vmkernel:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    dvswitch_name: "{{ main_dvswitch.name }}"
+    portgroup_name: "{{ main_dvswitch.pgroups.management.name }}"
+    network:
+      type: "static"
+      ip_address: "{{ item.ip1 }}"
+      subnet_mask: "{{ item.netmask1 }}"
+    device: vmk0
+    state: present
+    enable_mgmt: true
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"

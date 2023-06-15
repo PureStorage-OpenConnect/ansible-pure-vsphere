@@ -1,0 +1,4 @@
+- ansible.builtin.include_tasks: fc.yaml
+  when:  san_type is not defined or san_type == 'fc'
+- ansible.builtin.include_tasks: iscsi.yaml
+  when:  san_type is defined and san_type == 'iscsi'

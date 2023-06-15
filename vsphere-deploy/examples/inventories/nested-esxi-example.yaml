@@ -1,0 +1,9 @@
+all:
+  vars:
+    # nested ESXi hosts
+    hosting_vcenter_hostname: <vcenter-hostname>
+    hosting_vcenter_username: <vcenter-user>
+    hosting_vcenter_password: <vcente-password>
+    hosting_esxi_datacenter: CTO
+    hosting_esxi_cluster: Cisco-FC
+    hosting_esxi_folder: /CTO/vm/vsphere-demo

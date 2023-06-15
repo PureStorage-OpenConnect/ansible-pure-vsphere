@@ -1,0 +1,6 @@
+- ansible.builtin.include_tasks: create_iscsi_dvs.yaml
+  when: san_type == "iscsi"
+- ansible.builtin.include_tasks: add_hosts.yaml
+  when: san_type == "iscsi"
+- ansible.builtin.include_tasks: hba.yaml
+  when: san_type == "iscsi"

@@ -1,0 +1,21 @@
+- name: Create replicated protection group for datastores
+  purestorage.flasharray.purefa_pg:
+    name: "{{ repl_pg_name }}"
+    volume: "{{ datastores }}"
+    target:
+      - "{{ repl_fa }}"
+    enabled: "{{ enable_local_snapshots }}"
+    fa_url: "{{ main_fa_url }}"
+    api_token: "{{ main_fa_api_token}}"
+
+- name: Create protection group replication policy
+  purestorage.flasharray.purefa_pgsched:
+    name: "{{ repl_pg_name }}"
+    schedule: replication
+    enabled: true
+    replicate_frequency: "{{ replication_frequency }}" 
+    target_all_for: "{{ keep_repl_for_days }}"
+    target_per_day: "{{ keep_repl_per_day }}"
+    target_days: "{{ keep_repl_before_eradicate }}"
+    fa_url: "{{ main_fa_url }}"
+    api_token: "{{ main_fa_api_token}}"

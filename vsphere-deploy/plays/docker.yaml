@@ -1,0 +1,11 @@
+- hosts: esxi_installer
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose
+    docker_users:
+      - ubuntu
+  become: true
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker

@@ -1,0 +1,12 @@
+- name: Exit maintenance mode
+  community.vmware.vmware_maintenancemode:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}.{{ domain_name}}"
+    timeout: 3600
+    state: absent
+    validate_certs: no
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"

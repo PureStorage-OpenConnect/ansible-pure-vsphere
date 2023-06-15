@@ -1,0 +1,4 @@
+- hosts: esxi_installer
+  gather_facts: false
+  roles:
+    - ipxe_image_builder

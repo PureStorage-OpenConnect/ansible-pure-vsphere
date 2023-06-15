@@ -1,0 +1,9 @@
+- name: Copy iPXE for legacy BIOS
+  ansible.builtin.copy:
+    src: "{{ ipxe_compile_dir }}/ipxe/src/bin/undionly.kpxe"
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/undionly.kpxe"
+
+- name: Copy iPXE for UEFI
+  ansible.builtin.copy:
+    src: "{{ ipxe_compile_dir }}/ipxe/src/bin-x86_64-efi/ipxe.efi"
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/ipxe.efi"

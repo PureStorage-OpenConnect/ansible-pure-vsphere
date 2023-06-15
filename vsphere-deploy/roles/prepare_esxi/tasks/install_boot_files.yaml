@@ -1,0 +1,50 @@
+- name: Copy BIOS boot file
+  copy:
+    src: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/boot.cfg"
+
+- name: Copy BIOS kernel image 
+  copy:
+    src: "{{ http_install_dir }}/{{ os_version }}/mboot.c32"
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/mboot.c32"
+
+- name: Copy kickstart file
+  ansible.builtin.template:
+    src: "{{ esxi_ks_template }}"
+    dest: "{{ http_install_dir }}/ks_files/{{ esxi_ks_filename | basename }}"
+
+- name: Create pxeboot files
+  copy:
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/pxelinux.cfg/01-{{ item.mac1 | replace(':','-') }}"
+    content: |
+      DEFAULT install
+      NOHALT 1
+      LABEL install
+        KERNEL mboot.c32
+        APPEND -c boot.cfg
+        IPAPPEND 2
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create UEFI boot directories
+  ansible.builtin.file:
+    path: "{{ tftpboot_dir }}/{{ os_version }}/01-{{ item.mac1 | replace(':','-') }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create UEFI boot config files
+  copy:
+    src: "{{ http_install_dir }}/{{ os_version }}/boot.cfg"
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/01-{{ item.mac1 | replace(':','-') }}/boot.cfg"
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Copy UEFI boot file
+  copy:
+    src: "{{ http_install_dir }}/{{ os_version }}/efi/boot/bootx64.efi"
+    dest: "{{ tftpboot_dir }}/{{ os_version }}/mboot.efi"

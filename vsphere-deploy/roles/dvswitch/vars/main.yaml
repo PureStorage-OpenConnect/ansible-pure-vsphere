@@ -1,0 +1,8 @@
+main_dvswitch:
+  name: dvSwitch-svc
+  uplinks: 2
+  pgroups:
+    management:
+      name: management
+      vlan: 0
+      port_binding: static

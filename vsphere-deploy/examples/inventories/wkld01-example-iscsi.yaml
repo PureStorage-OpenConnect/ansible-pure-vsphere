@@ -1,0 +1,96 @@
+all:
+  hosts:
+    esxi_installer_host:
+      ansible_host: 127.0.0.1
+    vcsa_installer_hosts:
+      ansible_host: 127.0.0.1
+  children:
+    esxi_installer:
+      hosts:
+        esxi_installer_host
+    vcsa_installer:
+      hosts:
+        vcsa_installer_hosts
+    
+  vars:
+    # ESXi
+
+    os_version: ESXi-8.0b
+    os_iso: /home/ubuntu/iso/VMware-VMvisor-Installer-8.0b-21203435.x86_64.iso
+    http_host: 172.16.100.2
+    syslinux_tarball: /home/ubuntu/repo/syslinux-6.03.tar.gz
+    dnsmasq_ip: 172.16.100.2
+    dhcp_gw: 172.16.100.1
+    dhcp_start: 172.16.100.100
+    dhcp_end: 172.16.100.150
+    dhcp_netmask: 255.255.255.0
+    dhcp_dns1: 10.225.113.198
+    vcenter_hostname: vcsa-wkld01.demo.pure
+    vcenter_username: administrator@demo.pure
+    vcenter_password: VMware1!
+    datacenter_name: WKLD01
+    cluster_name: wkld01-cluster01
+    esxi_username: root
+    esxi_password: VMware1!
+    domain_name: demo.pure
+    install_hosts:
+      - name: esxi-wkld01-01
+        mac1: 00:50:56:84:d5:de
+        ip1: 172.16.100.31
+        netmask1: 255.255.255.0
+        ip2: 172.16.100.41
+        netmask2: 255.255.255.0
+      - name: esxi-wkld01-02
+        mac1: 00:50:56:84:10:a5
+        ip1: 172.16.100.32
+        netmask1: 255.255.255.0
+        ip2: 172.16.100.42
+        netmask2: 255.255.255.0
+      - name: esxi-wkld01-03
+        mac1: 00:50:56:84:35:02
+        ip1: 172.16.100.33
+        netmask1: 255.255.255.0
+        ip2: 172.16.100.43
+        netmask2: 255.255.255.0
+
+    # VCSA
+    
+    vcsa_iso: /home/ubuntu/iso/VMware-VCSA-all-8.0.0-21216066.iso
+    mgnt_vc_hostname: <vsphere-hostname>
+    mgnt_vc_username: <user>
+    mgnt_vc_password: <password>
+    mgnt_vc_deployment_network: esxi-ansible-test
+    mgnt_vc_datacenter: CTO
+    mgnt_vc_datastore: z-cisco-x90-a-VSI-datastore-FC
+    mgnt_vc_esxi_cluster: Cisco-FC
+    mgnt_vc_folder: /vsphere-demo/wkld-vcsa
+    vcsa_appliance_name: vcsa-wkld01
+    vcsa_deployment_option: tiny
+    vcsa_network_mode: static
+    vcsa_hostname: vcsa-wkld01
+    vcsa_domain: demo.pure
+    vcsa_ip: 172.16.100.30
+    vcsa_network_prefix: 24
+    vcsa_gateway: 172.16.100.1
+    vcsa_dns_servers:
+      - 10.225.113.198
+    vcsa_root_password: VMware1!
+    vcsa_ssh_enable: true
+    vcsa_ntp_servers:
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org
+    sso_password: VMware1!
+    sso_domain: demo.pure
+    dryrun: false
+
+    # Flasharray
+    san_type: iscsi
+    fa_address: 10.11.12.13
+    fa_api_token: xxxxxxxx-xxxxxxxxx-xxxxxxxxxxxxxxxxx
+    fa_iscsi_target_address: 192.168.30.16
+
+    # Datastore
+    vmfs_datastore_name: eg-test-ds01
+    vmfs_datastore_size: 1T
+    fa_default_protection: false

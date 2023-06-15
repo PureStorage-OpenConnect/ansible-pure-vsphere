@@ -1,0 +1,7 @@
+- ansible.builtin.include_tasks: create_install_dirs.yaml
+- ansible.builtin.include_tasks: copy_iso.yaml
+- ansible.builtin.include_tasks: prepare_pxe.yaml
+- ansible.builtin.include_tasks: prepare_ipxe.yaml
+- ansible.builtin.include_tasks: prepare_esxi_boot_cfg.yaml
+- ansible.builtin.include_tasks: prepare_dnsmasq.yaml
+- ansible.builtin.include_tasks: install_boot_files.yaml

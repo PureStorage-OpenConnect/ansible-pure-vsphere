@@ -1,0 +1,9 @@
+- name: Gather info from DR datacenter
+  community.vmware.vmware_cluster_info:
+    hostname: "{{ dr_vcenter_hostname }}"
+    username: "{{ dr_vcenter_username }}"
+    password: "{{ dr_vcenter_password }}"
+    datacenter: "{{ dr_datacenter }}"
+    cluster_name: "{{ dr_cluster }}"
+    validate_certs: False
+  register: dr_cluster_info

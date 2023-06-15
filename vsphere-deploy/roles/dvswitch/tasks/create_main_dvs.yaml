@@ -1,0 +1,10 @@
+- name: Create main dvswitch
+  community.vmware.vmware_dvswitch:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ datacenter_name }}"
+    switch: "{{ main_dvswitch.name }}"
+    uplink_quantity: "{{ main_dvswitch.uplinks }}"
+    state: present
+    validate_certs: no

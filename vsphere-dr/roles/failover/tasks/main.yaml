@@ -1,0 +1,4 @@
+- ansible.builtin.include_tasks: gather_cluster_info.yaml
+- ansible.builtin.include_tasks: shutdown_vms.yaml
+- ansible.builtin.include_tasks: clone_datastores.yaml  
+- ansible.builtin.include_tasks: remount_datastores.yaml

@@ -1,0 +1,83 @@
+{% set time_tools_sync = vcsa_time_tools_sync | default(false) %}
+{% set vcsa_folder = mgnt_vc_folder | default('') %}
+{% set vcsa_cluster = mgnt_vc_esxi_cluster.split('/') %}
+{
+    "__version": "2.13.0",
+    "new_vcsa": {
+        "vc": {
+
+            "hostname": "{{ mgnt_vc_hostname }}",
+            "username": "{{ mgnt_vc_username }}",
+            "password": "{{ mgnt_vc_password }}",
+            "deployment_network": "{{ mgnt_vc_deployment_network }}",
+            "datacenter": [
+                "{{ mgnt_vc_datacenter }}"
+            ],
+            "datastore": "{{ mgnt_vc_datastore }}",
+    {% if vcsa_folder != '' %}
+            "vm_folder": "{{ vcsa_folder }}",
+    {% endif %}
+            "target": [
+    {% for t in vcsa_cluster %}
+      {% if t != '' %}
+         {% if not loop.last %}
+       "{{ t }}",
+         {% else %}
+       "{{ t }}"
+         {% endif %}
+      {% endif %}
+    {% endfor %}
+        ]
+        },
+        "appliance": {
+            "thin_disk_mode": {{ vcsa_thin_disk_mode | default('true') | string | lower }},
+            "deployment_option": "{{ vcsa_deployment_option | default('tiny') }}",
+            "name": "{{ vcsa_appliance_name }}"
+        },
+        "network": {
+            "ip_family": "{{ vcsa_ip_family | default('ipv4') }}",
+            "mode": "{{ vcsa_network_mode | default('dhcp') }}",
+    {% if vcsa_network_mode == 'static' %}
+        "system_name": "{{ vcsa_hostname }}.{{ vcsa_domain }}",
+            "ip": "{{ vcsa_ip }}",
+            "prefix": "{{ vcsa_network_prefix }}",
+            "gateway": "{{ vcsa_gateway }}",
+            "dns_servers": [
+       {% for d in vcsa_dns_servers %}
+           {% if not loop.last %}
+       "{{ d }}",
+           {% else %}
+       "{{ d }}"
+           {% endif %}
+       {% endfor %}
+    {% endif %}
+     ] 
+        },
+        "os": {
+            "password": "{{ vcsa_root_password }}",
+    {% if time_tools_sync %}
+            "time_tools_sync": true,
+    {% else %}
+            "ntp_servers": [
+       {% for n in vcsa_ntp_servers %}
+         {% if not loop.last %}
+       "{{ n }}",
+         {% else %}
+       "{{ n }}"
+         {% endif %}
+       {% endfor %}
+     ],
+    {% endif %}
+            "ssh_enable": {{ vcsa_ssh_enable | default('true') | string | lower }}
+        },
+        "sso": {
+            "password": "{{ sso_password }}",
+            "domain_name": "{{ sso_domain | default('vsphere.local') }}"
+        }
+    },
+    "ceip": {
+        "settings": {
+            "ceip_enabled": {{ ceip_enabled | default('false') | string | lower}}
+        }
+    }
+}

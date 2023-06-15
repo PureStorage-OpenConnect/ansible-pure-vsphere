@@ -1,0 +1,64 @@
+- name: Gather info from datacenter "{{ datacenter_name }}" about  cluster "{{ cluster_name }}"
+  community.vmware.vmware_cluster_info:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ datacenter_name }}"
+    cluster_name: "{{ cluster_name }}"
+    validate_certs: False
+  register: cluster_info
+
+- name: Gather iSCSI configuration information of ESXi hosts in cluster "{{ cluster_name }}"
+  community.vmware.vmware_host_iscsi_info:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}"
+    validate_certs: False
+  loop: "{{ cluster_info.clusters[cluster_name].hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: iscsi_info
+
+- name: Add FlashArray dynamic target to iSCSI config of ESXi hosts in cluster "{{ cluster_name }}"
+  community.vmware.vmware_host_iscsi:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ item.name }}"
+    validate_certs: False
+    iscsi_config:
+      vmhba_name: vmhba65
+      send_target:
+        address: "{{ fa_iscsi_target_address }}"
+    state: present
+  loop: "{{ cluster_info.clusters[cluster_name].hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Add cluster "{{ cluster_name }}" ESXi hosts to FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_host:
+    name: "{{ item.item.name.split('.')[0] | lower }}"
+    personality: esxi
+    iqn: "{{ item.iscsi_properties.iscsi_name }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+  loop: "{{ iscsi_info.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Create hostgroup "{{ cluster_name }}" on FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_hg:
+    hostgroup: "{{ cluster_name }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+
+- name: Add ESXi hosts to hostgroup "{{ cluster_name }}" on FlashArray "{{ fa_address }}"
+  purestorage.flasharray.purefa_hg:
+    hostgroup: "{{ cluster_name }}"
+    host: "{{ item.item.name.split('.')[0] | lower }}"
+    fa_url: "{{ fa_address }}"
+    api_token: "{{ fa_api_token }}"
+  loop: "{{ iscsi_info.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"

@@ -1,0 +1,22 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: collect snapshot set of information
+      purestorage.flasharray.purefa_info:
+        gather_subset:
+          - snapshots
+        fa_url: "{{ repl_fa_url }}"
+        api_token: "{{ repl_fa_api_token }}"
+      register: array_info
+
+    - name: set_fact 
+      no_log: true
+      ansible.builtin.set_fact:
+        snaps: "{{ item.key }}:{{ item.value }}"
+      loop: "{{ lookup('ansible.builtin.dict', array_info.purefa_info.snapshots) }}"
+      when: "'vFA01a:test-repl-pg' in item.key"
+
+    - name: show default information
+      ansible.builtin.debug:
+        msg: "{{ snaps }}"

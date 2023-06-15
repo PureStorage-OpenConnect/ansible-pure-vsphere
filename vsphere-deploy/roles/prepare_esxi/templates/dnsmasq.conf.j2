@@ -1,0 +1,51 @@
+# Don't function as a DNS server:
+port=0
+
+# Run as root user
+user=root
+
+# Log lots of extra information about DHCP transactions.
+log-dhcp
+
+enable-tftp
+
+# Set the root directory for files available via FTP.
+tftp-root=/tftpboot
+
+# Disable re-use of the DHCP servername and filename fields as extra
+# option space. That's to avoid confusing some old or broken DHCP clients.
+dhcp-no-override
+
+# Tag dhcp request from iPXE
+dhcp-match=set:ipxe,175
+
+# inspect the vendor class string and match the text to set the tag
+dhcp-vendorclass=set:BIOS,PXEClient:Arch:00000
+
+
+# 1st boot file - Legacy BIOS client
+dhcp-boot=tag:!ipxe,tag:BIOS,undionly.kpxe,{{ dnsmasq_ip }}
+
+# 1st boot file - EFI client
+dhcp-boot=tag:!ipxe,tag:!BIOS,ipxe.efi,{{ dnsmasq_ip }}
+
+# 2nd boot file - Legacy BIOS
+dhcp-boot=tag:ipxe,tag:BIOS,pxelinux.0,{{ dnsmasq_ip }},{{ dnsmasq_ip }}
+
+# 2nd boot file - EFI client
+dhcp-boot=tag:ipxe,tag:!BIOS,mboot.efi,{{ dnsmasq_ip }},{{ dnsmasq_ip }}
+
+# PXE menu.  The first part is the text displayed to the user.  The second is the timeout, in seconds.
+pxe-prompt="Booting ESXi", 1
+
+{% if dhcp_proxy is not defined or not dhcp_proxy %}
+dhcp-range={{ dhcp_start }},{{ dhcp_end }},{{ dhcp_netmask }},6h
+dhcp-option=option:router,{{ dhcp_gw }}
+dhcp-option=option:dns-server,{{ dhcp_dns1 }}
+{% for item in install_hosts %}
+dhcp-host={{ item.mac1 }},{{ item.name }},{{ item.ip1 }},infinite
+{% endfor %}
+{% else %}
+dhcp-range={{ dnsmasq_ip }},proxy
+{% endif %}
+
