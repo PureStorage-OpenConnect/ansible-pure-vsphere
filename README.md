@@ -1,1 +1,2 @@
-# ansible-pure-vsphere
+# vSphere and Pure Storage combined playbooks examples
+
