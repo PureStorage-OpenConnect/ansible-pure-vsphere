@@ -1,0 +1,58 @@
+- name: Ensure hosts are switched off
+  community.general.ipmi_power:
+    name: "{{ item.bmc }}"
+    user: "{{ item.bmc_user }}"
+    password: "{{ item.bmc_password }}"
+    state: 'off'
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: dryrun is not defined or not dryrun
+
+- name: Set hosts to boot from first vnic
+  community.general.ipmi_boot:
+    name: "{{ item.bmc }}"
+    user: "{{ item.bmc_user }}"
+    password: "{{ item.bmc_password }}"
+    bootdev: network
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: dryrun is not defined or not dryrun
+
+- name: Power-on hosts
+    name: "{{ item.bmc }}"
+    user: "{{ item.bmc_user }}"
+    password: "{{ item.bmc_password }}"
+    state: 'on'
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: dryrun is not defined or not dryrun
+
+- name: Set hosts to boot from first disk
+  community.general.ipmi_boot:
+    name: "{{ item.bmc }}"
+    user: "{{ item.bmc_user }}"
+    password: "{{ item.bmc_password }}"
+    bootdev: 'hd'
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: dryrun is not defined or not dryrun
+
+- name: Check whether ESXi nodes are available
+  community.vmware.vmware_about_info:
+    hostname: "{{ item.ip1 }}"
+    username: "{{ esxi_username }}"
+    password: "{{ esxi_password }}"
+    validate_certs: no
+  register: esxi_about_info
+#  until: esxi_about_info.about_info.product_name == "VMware ESXi"
+  until: esxi_about_info is not failed and esxi_about_info.about_info is defined and esxi_about_info.about_info.product_name == "VMware ESXi"
+  delay: 60
+  retries: 40
+  loop: "{{ install_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: dryrun is not defined or not dryrun
